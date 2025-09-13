@@ -177,7 +177,7 @@ const RetroDesktop: React.FC = () => {
       {/* Back to Cafe Button */}
       <button
         onClick={handleBackToCafe}
-        className="fixed top-1 left-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-mono text-sm transition-colors"
+        className="fixed top-1 left-1 bg-black hover:bg-gray-800 text-white px-4 py-2 rounded font-mono text-sm transition-colors"
       >
         ← Back to Cyber Café
       </button>
@@ -215,7 +215,7 @@ const RetroDesktop: React.FC = () => {
             {/* Load Credits Button */}
             <button
               onClick={() => setShowCreditModal(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-mono transition-colors"
+              className="bg-black hover:bg-gray-800 text-white px-3 py-1 rounded text-xs font-mono transition-colors"
             >
               LOAD
             </button>
@@ -232,7 +232,7 @@ const RetroDesktop: React.FC = () => {
                   ✕
                 </button>
 
-                <div className="text-green-400 font-mono text-center mb-4 text-xl">
+                <div className="text-black font-mono text-center mb-4 text-xl">
                   LOAD CREDITS
                 </div>
 
