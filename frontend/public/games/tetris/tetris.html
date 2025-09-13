@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="logo.ico">
+    <script src="https://kit.fontawesome.com/5a94cd9bd0.js" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>tetris</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta&display=swap" rel="stylesheet">
+</head>
+<style>
+    body {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      background-color: black;
+    }
+
+    #audio__button{
+      color: #fff;
+      background-image: linear-gradient(to top, #f77062 0%, #fe5196 100%);
+      position: absolute;
+      top: 90%;
+      left: 2%;
+      padding: 5px 24px;
+      border-radius: 4px;
+      font-size: 2rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    #score {
+      color: #fff;
+      font-size: 2rem;
+      position: absolute;
+      top: 1%;
+      left: 76%;
+    }
+
+    #game-board {
+      background-color: rgb(70, 70, 70);
+      width: 50vmin;
+      height: 100vmin;
+      display: grid;
+      grid-template-rows: repeat(20, 1fr);
+      grid-template-columns: repeat(10, 1fr);
+    }
+
+    #back {
+      position: absolute;
+      top: 1%;
+      left: 2%;
+      font-size: 2rem;
+      background-image: linear-gradient(to top, #f77062 0%, #fe5196 100%);
+      padding: 5px 24px;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      outline: none;
+    }
+
+    #back a {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    #preview-board {
+        background-color: rgb(70, 70, 70);
+        width: 200px;
+        height: 150px;
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
+        position: absolute;
+        top: 25%;
+        left: 76%;
+    }
+
+    #hold-board {
+        background-color: rgb(70, 70, 70);
+        width: 200px;
+        height: 150px;
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
+        position: absolute;
+        left: 2%;
+        top: 25%;
+    }
+
+    #hold__container {
+      width: 30vmin;
+      height: 25vmin;
+      position: absolute;
+      left: 2%;
+      top: 20%;
+    }
+
+    #hold__container h1 {
+      color: #fff;
+      position: relative;
+      top: -25%;
+    }
+
+    @media screen and (max-width: 960px) {
+
+      #preview-board {
+        height: 63px;
+        width: 84px;
+      }
+
+      #hold-board {
+        height: 63px;
+        width: 84px;
+      }
+    }
+
+    #preview__container{
+      width: 30vmin;
+      height: 25vmin;
+      position: absolute;
+      top: 20%;
+      left: 76%;
+    }
+
+    #preview__container h1 {
+        color: #fff;
+        position: relative;
+        top: -25%;
+    }
+
+    .shadow {
+      background-color: hsl(0, 0%, 50%);
+      border: .25vmin solid rgb(255, 255, 255);
+    }
+
+    .block1 {
+      background-color: hsl(115, 100%, 50%);
+      border: .25vmin solid rgb(255, 255, 255);
+    }
+
+    .block2 {
+      background-color: hsl(64, 100%, 50%);
+      border: .25vmin solid rgb(255, 255, 255);
+    }
+
+    .block3 {
+      background-color: hsl(36, 100%, 50%);
+      border: .25vmin solid rgb(255, 255, 255);
+    }
+
+    .block4 {
+      background-color: hsl(214, 100%, 50%);
+      border: .25vmin solid rgb(255, 255, 255);
+    }
+
+    .block5 {
+      background-color: hsl(12, 100%, 50%);
+      border: .25vmin solid rgb(255, 255, 255);
+    }
+
+    .block6 {
+      background-color: hsl(278, 100%, 50%);
+      border: .25vmin solid rgb(255, 255, 255);
+    }
+
+    .block7 {
+      background-color: hsl(313, 100%, 50%);
+      border: .25vmin solid rgb(255, 255, 255);
+    }
+
+    .buttons__container {
+      position: absolute;
+      top: -1000px;
+    }
+
+    @media screen and (max-width: 600px) {
+
+      body {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+        -ms-touch-select: none;
+        touch-action: none;
+        -ms-touch-action: none;
+      }
+
+      #audio__button{
+        position: absolute;
+        top: 1%;
+        left: 35%;
+        font-size: 2rem;
+        background-image: linear-gradient(to top, #f77062 0%, #fe5196 100%);
+        padding: 4px 12px;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        outline: none;
+      }
+
+      #back{
+        position: absolute;
+        top: 1%;
+        left: 2%;
+        font-size: 2rem;
+        background-image: linear-gradient(to top, #f77062 0%, #fe5196 100%);
+        padding: 4px 12px;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        outline: none;
+      }
+
+      #preview-board {
+        left: 78%;
+      }
+
+      .buttons__container {
+        background-color: rgb(0, 0, 0);
+        position: absolute;
+        top: 90%;
+      }
+
+      .buttons__container button {
+        background-color: rgb(0, 0, 0);
+        border: .5vmin solid #fff;
+        border-radius: 5px;
+      }
+
+      #mobile {
+        background-color: rgb(0, 0, 0);
+        color: black;
+      }
+
+      #left {
+        position: absolute;
+        top: -110%;
+        left: 20%;
+      }
+
+      #right {
+        position: absolute;
+        top: -110%;
+        left: 61%;
+      }
+
+      #hold__container h1 {
+        font-size: 24px
+      }
+
+      #preview__container h1 {
+        font-size: 24px
+      }
+
+      #preview__container {
+        left: 76%;
+        width: 0;
+      }
+
+      #preview-board {
+        left: 76%;
+      }
+
+      #game-board {
+        width: 40vmin;
+        height: 80vmin;
+        position: absolute;
+        top: 20%;
+      }
+
+      #score {
+        font-size: 20px;
+      }
+
+      @media screen and (max-width: 380px) {
+        #preview__container {
+          left: 72%;
+          width: 0;
+        }
+
+        #preview-board {
+          left: 72%;
+        }
+
+        #audio__button{
+
+          font-size: 1.5rem;
+        }
+
+        #back{
+          font-size: 1.5rem;
+        }
+      }
+    }
+</style>
+<body>
+  <button id="audio__button">sound</button>
+  <audio loop id="audio">
+    <source src="audio/tetris.mp3">
+  </audio>
+  <audio id="pop">
+    <source src="audio/pop.mp3">
+  </audio>
+  <div id="game-board"></div>
+  <label id="score">Score: 0</label>
+  <button id="back"><a>BACK</a></button>
+  <div id="preview__container">
+      <h1>NEXT:</h1>
+  </div>
+  <div id="preview-board"></div>
+  <div id="hold__container">
+    <h1>HOLD:</h1>
+  </div>
+  <div class="buttons__container">
+    <button id="left"><img src="images_tetris/left.png" id="mobile"></button>
+    <button id="leftm"><img src="images_tetris/leftm.png" id="mobile"></button>
+    <button id="down"><img src="images_tetris/down.png" id="mobile"></button>
+    <button id="hold"><img src="images_tetris/hold.png" id="mobile"></button>
+    <button id="downh"><img src="images_tetris/downh.png" id="mobile"></button>
+    <button id="rightm"><img src="images_tetris/rightm.png" id="mobile"></button>
+    <button id="right"><img src="images_tetris/right.png" id="mobile"></button>
+  </div>
+  <div id="hold-board"></div>
+  <script src="game.js" defer type="module"></script>
+  <script src="audio.js" defer type="module"></script>
+  <script>
+    if (window.innerWidth <= 600) {
+      document.body.style.webkitTouchCallout='none';
+      window.oncontextmenu = function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      }
+    }
+  </script>
+</body>
+</html>
