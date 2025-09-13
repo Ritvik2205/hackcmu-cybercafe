@@ -5,10 +5,12 @@ import Dashboard from './pages/Dashboard';
 import GameScreen from './pages/GameScreen';
 import RetroDesktop from './pages/RetroDesktop';
 import Payment from './pages/Payment';
+import Leaderboard from './pages/Leaderboard';
 import './App.css';
 import { CyberCafe3D } from './components/3D';
 import WelcomeScreen from './components/WelcomeScreen';
 import { ClerkProvider } from '@clerk/clerk-react';
+import { UserCreditsProvider } from './contexts/UserCreditsContext';
 
 function App() {
   return (
@@ -31,18 +33,21 @@ function App() {
         },
       }}
     >
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<WelcomeScreen />} />
-          <Route path="/cybercafe" element={<CyberCafe3D />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/payment" element={<Payment/>} />
-          <Route path="/game/:gameType" element={<GameScreen />} />
-          <Route path="/desktop" element={<RetroDesktop />} />
-        </Routes>
-      </div>
+      <UserCreditsProvider>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<WelcomeScreen />} />
+            <Route path="/cybercafe" element={<CyberCafe3D />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/payment" element={<Payment/>} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/game/:gameType" element={<GameScreen />} />
+            <Route path="/desktop" element={<RetroDesktop />} />
+          </Routes>
+        </div>
+      </UserCreditsProvider>
       </ClerkProvider>
     </Router>
   );

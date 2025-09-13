@@ -9,6 +9,8 @@ const Login: React.FC = () => {
           routing="path"
           path="/login"
           signUpUrl="/register"
+          fallbackRedirectUrl="/cybercafe"
+          signUpFallbackRedirectUrl="/cybercafe"
         />
       </div>
     </div>

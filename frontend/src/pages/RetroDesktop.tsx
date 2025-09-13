@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TetrisPage from '../components/TetrisPage';
 import PacmanPage from '../components/PacmanPage';
+import { useUserCredits } from '../contexts/UserCreditsContext';
 
 interface GameModal {
   id: string;
@@ -15,9 +16,9 @@ interface GameModal {
 const RetroDesktop: React.FC = () => {
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [accountCredits, setAccountCredits] = useState(1250); // User's account credits
   const [loadedCredits, setLoadedCredits] = useState(0); // Credits loaded on this computer
   const [showCreditModal, setShowCreditModal] = useState(false);
+  const { credits: accountCredits, isLoading: creditsLoading, updateCredits } = useUserCredits();
 
   const games: GameModal[] = [
     {
@@ -71,7 +72,7 @@ const RetroDesktop: React.FC = () => {
       } else {
         // Not enough credits in account, go to cashier
         if (confirm(`Insufficient credits! You need ${game.cost} credits but only have ${accountCredits} in your account.\n\nWould you like to go to the cashier to buy more credits?`)) {
-          navigate('/');
+          navigate('/cybercafe');
         }
       }
     }
@@ -83,7 +84,7 @@ const RetroDesktop: React.FC = () => {
 
   const handleLoadCredits = (amount: number) => {
     if (accountCredits >= amount) {
-      setAccountCredits(prev => prev - amount);
+      updateCredits(accountCredits - amount);
       setLoadedCredits(prev => prev + amount);
       setShowCreditModal(false);
     } else {
@@ -92,11 +93,11 @@ const RetroDesktop: React.FC = () => {
   };
 
   const handleGoToCashier = () => {
-    navigate('/');
+    navigate('/cybercafe');
   };
 
   const handleBackToCafe = () => {
-    navigate('/');
+    navigate('/cybercafe');
   };
 
   return (
@@ -191,7 +192,7 @@ const RetroDesktop: React.FC = () => {
               </div>
               <div className="text-green-400 font-mono">
                 <div className="text-xs">ACCOUNT</div>
-                <div className="text-lg font-bold">{accountCredits.toLocaleString()}</div>
+                <div className="text-lg font-bold">{creditsLoading ? '...' : accountCredits.toLocaleString()}</div>
               </div>
             </div>
 
@@ -237,14 +238,16 @@ const RetroDesktop: React.FC = () => {
                 </div>
 
                 <div className="text-white font-mono text-center mb-4">
-                  <div className="mb-2">Account Credits: {accountCredits.toLocaleString()}</div>
+                  <div className="mb-2">
+                    Account Credits: {creditsLoading ? 'Loading...' : accountCredits.toLocaleString()}
+                  </div>
                   <div className="mb-4">Loaded Credits: {loadedCredits.toLocaleString()}</div>
                 </div>
 
                 <div className="space-y-3">
                   <button
                     onClick={() => handleLoadCredits(100)}
-                    disabled={accountCredits < 100}
+                    disabled={creditsLoading || accountCredits < 100}
                     className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white py-2 px-4 rounded font-mono transition-colors"
                   >
                     Load 100 Credits
@@ -252,7 +255,7 @@ const RetroDesktop: React.FC = () => {
                   
                   <button
                     onClick={() => handleLoadCredits(250)}
-                    disabled={accountCredits < 250}
+                    disabled={creditsLoading || accountCredits < 250}
                     className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white py-2 px-4 rounded font-mono transition-colors"
                   >
                     Load 250 Credits
@@ -260,7 +263,7 @@ const RetroDesktop: React.FC = () => {
                   
                   <button
                     onClick={() => handleLoadCredits(500)}
-                    disabled={accountCredits < 500}
+                    disabled={creditsLoading || accountCredits < 500}
                     className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white py-2 px-4 rounded font-mono transition-colors"
                   >
                     Load 500 Credits
@@ -268,10 +271,10 @@ const RetroDesktop: React.FC = () => {
                   
                   <button
                     onClick={() => handleLoadCredits(accountCredits)}
-                    disabled={accountCredits <= 0}
+                    disabled={creditsLoading || accountCredits <= 0}
                     className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white py-2 px-4 rounded font-mono transition-colors"
                   >
-                    Load All ({accountCredits.toLocaleString()})
+                    Load All ({creditsLoading ? '...' : accountCredits.toLocaleString()})
                   </button>
                 </div>
 

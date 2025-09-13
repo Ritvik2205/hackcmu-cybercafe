@@ -9,6 +9,7 @@ import MasterChiefModel from './MasterChief';
 import ComputerModel from './ComputerModel';
 import AntiqueDesk from './AntiqueDesk';
 import Shelf from './Shelf';
+import LeaderboardModel from './LeaderboardModel';
 // import CeilingPipes from './CeilingPipes'; // Temporarily disabled
 
 // Camera Boundary Controller
@@ -400,6 +401,11 @@ const CyberCafeRoom3D: React.FC<{
     });
   };
 
+  const handleLeaderboardClick = () => {
+    // Navigate to leaderboard page
+    navigate('/leaderboard');
+  };
+
   const handleComputerClick = (computerId: number) => {
     const computer = computers.find(c => c.id === computerId);
     
@@ -460,6 +466,13 @@ const CyberCafeRoom3D: React.FC<{
           isActive={cashierActive}
         />
       </group>
+      
+      {/* Leaderboard - Back left corner */}
+      <LeaderboardModel 
+        position={[-5, 1, -4]}
+        onClick={handleLeaderboardClick}
+        isActive={false}
+      />
       
       {/* Computer users */}
       {computers.filter(computers => computers.isOccupied).map((computer) => (
