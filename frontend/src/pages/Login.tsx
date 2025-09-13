@@ -147,15 +147,10 @@ const Login: React.FC = () => {
   const groupRef = useRef<Group>(null);
 
   return <>
-  <SignedIn>
-    navigate('/');
-  </SignedIn>
-  <SignedOut>
     <SignIn
       routing="/login"
       signUpUrl='/register'
     />
-  </SignedOut>
   </>
 };
 
