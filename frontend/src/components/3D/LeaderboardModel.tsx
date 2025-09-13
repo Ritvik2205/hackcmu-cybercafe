@@ -56,9 +56,9 @@ const LeaderboardModel: React.FC<LeaderboardModelProps> = ({ position, onClick, 
       
       {/* Leaderboard Text Overlay - Using Html for better visibility */}
       <Html
-        position={[-5, 1, -3]}
+        position={[-4, 2, -3]}
         center
-        distanceFactor={0.5gi}
+        distanceFactor={0.5}
         zIndexRange={[100, 0]}
       >
         <div style={{
