@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Box, Plane } from '@react-three/drei';
+import { OrbitControls, Box, Plane, Text } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
@@ -16,13 +16,13 @@ const CameraBoundaryController: React.FC = () => {
   const { camera } = useThree();
   
   useFrame(() => {
-    // Define room boundaries (with some margin)
-    const roomMinX = -9;
-    const roomMaxX = 9;
-    const roomMinZ = -9;
-    const roomMaxZ = 9;
-    const roomMinY = 1;
-    const roomMaxY = 7;
+    // Define room boundaries (with some margin) - scaled down for smaller room
+    const roomMinX = -6;
+    const roomMaxX = 6;
+    const roomMinZ = -6;
+    const roomMaxZ = 6;
+    const roomMinY = 0.5;
+    const roomMaxY = 5;
     
     // Clamp camera position to room boundaries
     camera.position.x = Math.max(roomMinX, Math.min(roomMaxX, camera.position.x));
@@ -39,6 +39,68 @@ const getRandomChoice =(arr: string[]) =>{
 }
 
 const colors=["#fcba03","#1a2999", "#37a62b", "#e81405"];
+
+// Simple Text Bubble Component
+const PixelatedTextBubble: React.FC<{ 
+  position: [number, number, number]; 
+  message: string; 
+  onComplete: () => void;
+}> = ({ position, message, onComplete }) => {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    console.log('Text bubble created at position:', position, 'with message:', message);
+    
+    // Auto-hide after 3 seconds
+    const timer = setTimeout(() => {
+      console.log('Text bubble hiding');
+      setVisible(false);
+      setTimeout(onComplete, 500); // Give time for fade out
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [onComplete, position, message]);
+
+  if (!visible) return null;
+
+  return (
+    <group position={position}>
+      {/* Simple background bubble */}
+      <Plane args={[3, 1.5]} position={[0, 0, 0.1]}>
+        <meshBasicMaterial 
+          color="#000000" 
+          transparent 
+          opacity={0.9}
+        />
+      </Plane>
+      
+      {/* Simple border */}
+      <Box args={[3.1, 0.1, 0.1]} position={[0, 0.75, 0.1]}>
+        <meshBasicMaterial color="#00ff00" />
+      </Box>
+      <Box args={[3.1, 0.1, 0.1]} position={[0, -0.75, 0.1]}>
+        <meshBasicMaterial color="#00ff00" />
+      </Box>
+      <Box args={[0.1, 1.5, 0.1]} position={[1.55, 0, 0.1]}>
+        <meshBasicMaterial color="#00ff00" />
+      </Box>
+      <Box args={[0.1, 1.5, 0.1]} position={[-1.55, 0, 0.1]}>
+        <meshBasicMaterial color="#00ff00" />
+      </Box>
+      
+      {/* Text */}
+      <Text
+        position={[0, 0, 0.15]}
+        fontSize={0.2}
+        color="#00ff00"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {message}
+      </Text>
+    </group>
+  );
+};
 
 // Camera Controller Component with GSAP
 const CameraController: React.FC<{ 
@@ -181,89 +243,88 @@ const Room: React.FC = () => {
   return (
     <>
       {/* Floor */}
-      <Plane args={[20, 20]} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <meshLambertMaterial color="#2a2a2a" />
+      <Plane args={[14, 14]} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <meshLambertMaterial color="#4A4A2A" />
       </Plane>
       
       {/* Walls with Windows */}
       {/* Back Wall with Windows */}
-      <Plane args={[20, 8]} position={[0, 4, -10]}>
-        <meshLambertMaterial color="#1a1a1a" />
+      <Plane args={[14, 6]} position={[0, 3, -7]}>
+        <meshLambertMaterial color="#4A4A2A" />
       </Plane>
       {/* Back Wall Windows */}
-      <Plane args={[4, 3]} position={[-6, 4, -9.99]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} position={[-4, 3, -6.99]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
-      <Plane args={[4, 3]} position={[0, 4, -9.99]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} position={[0, 3, -6.99]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
-      <Plane args={[4, 3]} position={[6, 4, -9.99]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} position={[4, 3, -6.99]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
       
       {/* Shelves on Back Wall */}
-      <Shelf position={[-7, 2, -9]} />
-      <Shelf position={[-3, 2, -9]} />
-      <Shelf position={[1, 2, -9]} />
-      <Shelf position={[5, 2, -9]} />
-      <Shelf position={[7.5, 2, -9]} />
+      <Shelf position={[-3, 0.2, -6]} />
+      <Shelf position={[1, 0.2, -6]} />
+      <Shelf position={[4, 0.2, -6]} />
+      <Shelf position={[5.5, 0.2, -6]} />
       
       {/* Left Wall with Windows */}
-      <Plane args={[20, 8]} rotation={[0, Math.PI / 2, 0]} position={[-10, 4, 0]}>
-        <meshLambertMaterial color="#1a1a1a" />
+      <Plane args={[14, 6]} rotation={[0, Math.PI / 2, 0]} position={[-7, 3, 0]}>
+        <meshLambertMaterial color="#4A4A2A" />
       </Plane>
       {/* Left Wall Windows */}
-      <Plane args={[4, 3]} rotation={[0, Math.PI / 2, 0]} position={[-9.99, 4, -6]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} rotation={[0, Math.PI / 2, 0]} position={[-6.99, 3, -4]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
-      <Plane args={[4, 3]} rotation={[0, Math.PI / 2, 0]} position={[-9.99, 4, 0]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} rotation={[0, Math.PI / 2, 0]} position={[-6.99, 3, 0]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
-      <Plane args={[4, 3]} rotation={[0, Math.PI / 2, 0]} position={[-9.99, 4, 6]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} rotation={[0, Math.PI / 2, 0]} position={[-6.99, 3, 4]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
       
       {/* Right Wall with Windows */}
-      <Plane args={[20, 8]} rotation={[0, -Math.PI / 2, 0]} position={[10, 4, 0]}>
-        <meshLambertMaterial color="#1a1a1a" />
+      <Plane args={[14, 6]} rotation={[0, -Math.PI / 2, 0]} position={[7, 3, 0]}>
+        <meshLambertMaterial color="#4A4A2A" />
       </Plane>
       {/* Right Wall Windows */}
-      <Plane args={[4, 3]} rotation={[0, -Math.PI / 2, 0]} position={[9.99, 4, -6]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} rotation={[0, -Math.PI / 2, 0]} position={[6.99, 3, -4]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
-      <Plane args={[4, 3]} rotation={[0, -Math.PI / 2, 0]} position={[9.99, 4, 0]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} rotation={[0, -Math.PI / 2, 0]} position={[6.99, 3, 0]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
-      <Plane args={[4, 3]} rotation={[0, -Math.PI / 2, 0]} position={[9.99, 4, 6]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[3, 2]} rotation={[0, -Math.PI / 2, 0]} position={[6.99, 3, 4]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
       
       {/* Front Wall (with entrance) - partial wall */}
-      <Plane args={[8, 8]} position={[-6, 4, 10]}>
-        <meshLambertMaterial color="#1a1a1a" />
+      <Plane args={[6, 6]} position={[-4, 3, 7]}>
+        <meshLambertMaterial color="#4A4A2A" />
       </Plane>
-      <Plane args={[8, 8]} position={[6, 4, 10]}>
-        <meshLambertMaterial color="#1a1a1a" />
+      <Plane args={[6, 6]} position={[4, 3, 7]}>
+        <meshLambertMaterial color="#4A4A2A" />
       </Plane>
       {/* Front Wall Windows */}
-      <Plane args={[3, 3]} position={[-3, 4, 9.99]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[2, 2]} position={[-2, 3, 6.99]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
-      <Plane args={[3, 3]} position={[3, 4, 9.99]}>
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      <Plane args={[2, 2]} position={[2, 3, 6.99]}>
+        <meshBasicMaterial color="#04C4D9" transparent opacity={0.6} />
       </Plane>
       
       {/* Ceiling */}
-      <Plane args={[20, 20]} rotation={[Math.PI / 2, 0, 0]} position={[0, 8, 0]}>
-        <meshLambertMaterial color="#0a0a0a" />
+      <Plane args={[14, 14]} rotation={[Math.PI / 2, 0, 0]} position={[0, 6, 0]}>
+        <meshLambertMaterial color="#2F2F1A" />
       </Plane>
       
-      {/* Neon Strip Lights */}
-      <Box args={[18, 0.1, 0.1]} position={[0, 7.9, 0]}>
-        <meshBasicMaterial color="#00ffff" />
+      {/* Warm Strip Lights */}
+      <Box args={[12, 0.1, 0.1]} position={[0, 5.9, 0]}>
+        <meshBasicMaterial color="#FFD700" />
       </Box>
-      <Box args={[0.1, 0.1, 18]} position={[0, 7.9, 0]}>
-        <meshBasicMaterial color="#00ffff" />
+      <Box args={[0.1, 0.1, 12]} position={[0, 5.9, 0]}>
+        <meshBasicMaterial color="#FFD700" />
       </Box>
       
       {/* Ceiling Pipes - Multiple instances across the ceiling */}
@@ -277,63 +338,98 @@ const CyberCafeRoom3D: React.FC<{
   onCameraTargetChange: (target: { position: [number, number, number]; lookAt: [number, number, number] } | null) => void;
 }> = ({ onCameraTargetChange }) => {
   const [cashierActive, setCashierActive] = useState(false);
+  const [textBubbles, setTextBubbles] = useState<Array<{
+    id: string;
+    position: [number, number, number];
+    message: string;
+  }>>([]);
   const navigate = useNavigate();
+
+  // Random messages for occupied computers
+  const occupiedMessages = [
+    "Hey, I'm working here!",
+    "Sorry, I'm a bit occupied",
+    "I got here first!",
+    "This seat is taken!",
+    "Busy gaming right now",
+    "Please find another computer",
+    "Occupied, thanks!",
+    "I'm in the middle of something"
+  ];
   
   const [computers] = useState([
-    // Vertical Column 1 (Back to Front) - Right side
-    { id: 1, position: [0, 1, -6.5] as [number, number, number], isOccupied: false },
-    { id: 2, position: [0, 1, -4] as [number, number, number], isOccupied: true, currentUser: 'gamer_123' },
-    { id: 3, position: [0, 1, -1.5] as [number, number, number], isOccupied: false },
-    { id: 4, position: [0, 1, 1.0] as [number, number, number], isOccupied: true, currentUser: 'retro_player' },
-    { id: 5, position: [0, 1, 3.5] as [number, number, number], isOccupied: false },
+    // Vertical Column 1 (Back to Front) - Center
+    { id: 1, position: [0, 0.7, -4.5] as [number, number, number], isOccupied: false },
+    { id: 2, position: [0, 0.7, -2.5] as [number, number, number], isOccupied: true, currentUser: 'gamer_123' },
+    { id: 3, position: [0, 0.7, -0.5] as [number, number, number], isOccupied: false },
+    { id: 4, position: [0, 0.7, 1.5] as [number, number, number], isOccupied: true, currentUser: 'retro_player' },
+    { id: 5, position: [0, 0.7, 3.5] as [number, number, number], isOccupied: false },
     
     // Vertical Column 2 (Back to Front) - Right side
-    { id: 6, position: [4, 1, -6] as [number, number, number], isOccupied: true, currentUser: 'cyber_ninja' },
-    { id: 7, position: [4, 1, -3.5] as [number, number, number], isOccupied: false },
-    { id: 8, position: [4, 1, -1] as [number, number, number], isOccupied: false },
-    { id: 9, position: [4, 1, 1.5] as [number, number, number], isOccupied: false },
-    { id: 10, position: [4, 1, 4] as [number, number, number], isOccupied: true, currentUser: 'pro_gamer' },
+    { id: 6, position: [3, 0.7, -4] as [number, number, number], isOccupied: true, currentUser: 'cyber_ninja' },
+    { id: 7, position: [3, 0.7, -2] as [number, number, number], isOccupied: false },
+    { id: 8, position: [3, 0.7, 0] as [number, number, number], isOccupied: false },
+    { id: 9, position: [3, 0.7, 2] as [number, number, number], isOccupied: false },
+    { id: 10, position: [3, 0.7, 4] as [number, number, number], isOccupied: true, currentUser: 'pro_gamer' },
     
-    // Vertical Column 3 (Back to Front) - Right side
-    { id: 11, position: [8, 1, -6] as [number, number, number], isOccupied: false },
-    { id: 12, position: [8, 1, -3.5] as [number, number, number], isOccupied: false },
-    { id: 13, position: [8, 1, -1] as [number, number, number], isOccupied: true, currentUser: 'streamer_x' },
-    { id: 14, position: [8, 1, 1.5] as [number, number, number], isOccupied: false },
-    { id: 15, position: [8, 1, 4] as [number, number, number], isOccupied: false },
+    // Vertical Column 3 (Back to Front) - Far right side
+    { id: 11, position: [5.5, 0.7, -4] as [number, number, number], isOccupied: false },
+    { id: 12, position: [5.5, 0.7, -2] as [number, number, number], isOccupied: false },
+    { id: 13, position: [5.5, 0.7, 0] as [number, number, number], isOccupied: true, currentUser: 'streamer_x' },
+    { id: 14, position: [5.5, 0.7, 2] as [number, number, number], isOccupied: false },
+    { id: 15, position: [5.5, 0.7, 4] as [number, number, number], isOccupied: false },
   ]);
 
   const handleCashierDeskClick = () => {
     setCashierActive(true);
-    // Cashier desk is positioned at [-6, 0, 4]
+    // Cashier desk is positioned at [-4, 0, 3]
     // Flipped perspective: approach from the opposite side
     onCameraTargetChange({
-      position: [-8, 2, 8],
-      lookAt: [0, 1, 2]
+      position: [-5.5, 1.5, 5.5],
+      lookAt: [0, 0.7, 1.5]
     });
   };
 
   const handleCashierClick = () => {
     // setCashierActive(!cashierActive);
     setCashierActive(true);
-    // Cashier is positioned at [-6, 0, 3.5]
+    // Cashier is positioned at [-4, 0, 2.5]
     onCameraTargetChange({
-      position: [-8, 2, 8],
-      lookAt: [0, 1, 2]
+      position: [-5.5, 1.5, 5.5],
+      lookAt: [0, 0.7, 1.5]
     });
   };
 
   const handleComputerClick = (computerId: number) => {
     const computer = computers.find(c => c.id === computerId);
+    
     if (computer) {
-      onCameraTargetChange({
-        position: [computer.position[0] - 3, 2, computer.position[2] + 2],
-        lookAt: [computer.position[0], 1, computer.position[2]]
-      });
-      
-      // Redirect to desktop page after camera animation (2 seconds)
-      setTimeout(() => {
-        navigate('/desktop');
-      }, 2000);
+      if (computer.isOccupied) {
+        // Show text bubble for occupied computers
+        const randomMessage = getRandomChoice(occupiedMessages);
+        const bubbleId = `bubble-${computerId}-${Date.now()}`;
+        
+        setTextBubbles(prev => [...prev, {
+          id: bubbleId,
+          position: [computer.position[0], computer.position[1] + 2, computer.position[2]] as [number, number, number],
+          message: randomMessage
+        }]);
+        
+        // Remove bubble after animation completes
+        setTimeout(() => {
+          setTextBubbles(prev => prev.filter(bubble => bubble.id !== bubbleId));
+        }, 3500); // 3 seconds display + 0.5 second buffer
+      } else {
+        // Zoom in and redirect for unoccupied computers
+        onCameraTargetChange({
+          position: [computer.position[0] - 3, 2, computer.position[2] + 2],
+          lookAt: [computer.position[0], 1, computer.position[2]]
+        });
+        
+        setTimeout(() => {
+          navigate('/desktop');
+        }, 2000);
+      }
     }
   };
 
@@ -346,12 +442,12 @@ const CyberCafeRoom3D: React.FC<{
       <group>
         {/* Antique Desk for cashier */}
         <AntiqueDesk 
-          position={[-5, 1, 4]}
+          position={[-4, 0.7, 3]}
         />
         
         {/* Computer on the cashier desk */}
         <ComputerModel
-          position={[-5, 1, 4]}
+          position={[-4, 0.7, 3]}
           onClick={handleCashierDeskClick}
           isOccupied={cashierActive}
           rotation={[0, 0, 0]}
@@ -359,7 +455,7 @@ const CyberCafeRoom3D: React.FC<{
         
         {/* Master Chief - Behind the cashier desk */}
         <MasterChiefModel 
-          position={[-5, 0, 2]} 
+          position={[-4, 0, 2]} 
           onClick={handleCashierClick}
           isActive={cashierActive}
         />
@@ -368,6 +464,7 @@ const CyberCafeRoom3D: React.FC<{
       {/* Computer users */}
       {computers.filter(computers => computers.isOccupied).map((computer) => (
         <User3D
+          key={`user-${computer.id}`}
           position={[computer.position[0], computer.position[1], computer.position[2]-0.9]}
           name=""
           color={getRandomChoice(colors)}
@@ -390,16 +487,35 @@ const CyberCafeRoom3D: React.FC<{
         </group>
       ))}
       
+      {/* Text Bubbles for Occupied Computers */}
+      {textBubbles.map((bubble) => (
+        <PixelatedTextBubble
+          key={bubble.id}
+          position={bubble.position}
+          message={bubble.message}
+          onComplete={() => {
+            setTextBubbles(prev => prev.filter(b => b.id !== bubble.id));
+          }}
+        />
+      ))}
+
       {/* Cyberpunk Neon Lighting System */}
       <CyberpunkNeonLights computers={computers} />
       
-      <pointLight position={[0, 2, 0]} intensity={50} color="#ff00ff" distance={20} decay={0.5} />
+      {/* Main Central Warm Light */}
+      <pointLight position={[0, 5, 0]} intensity={2} color="#D96704" distance={20} decay={0.5} />
       
-      {/* Natural Sky Lighting */}
+      {/* Corner Point Lights */}
+      <pointLight position={[-6, 4, -6]} intensity={8} color="#D96704" distance={12} decay={0.5} />
+      <pointLight position={[6, 4, -6]} intensity={8} color="#D96704" distance={12} decay={0.5} />
+      <pointLight position={[-6, 4, 6]} intensity={8} color="#D96704" distance={12} decay={0.5} />
+      <pointLight position={[6, 4, 6]} intensity={8} color="#D96704" distance={12} decay={0.5} />
+      
+      {/* Natural Warm Sky Lighting */}
       <directionalLight 
         position={[0, 10, 0]} 
-        intensity={0.8} 
-        color="#87CEEB" 
+        intensity={0.6} 
+        color="#FFF8DC" 
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -410,15 +526,15 @@ const CyberCafeRoom3D: React.FC<{
         shadow-camera-bottom={-10}
       />
       
-      {/* Window Light Sources */}
-      <directionalLight position={[-10, 5, 0]} intensity={0.4} color="#87CEEB" />
-      <directionalLight position={[10, 5, 0]} intensity={0.4} color="#87CEEB" />
-      <directionalLight position={[0, 5, -10]} intensity={0.4} color="#87CEEB" />
+      {/* Window Light Sources - Warm */}
+      <directionalLight position={[-10, 5, 0]} intensity={0.3} color="#FFFACD" />
+      <directionalLight position={[10, 5, 0]} intensity={0.3} color="#FFFACD" />
+      <directionalLight position={[0, 5, -10]} intensity={0.3} color="#FFFACD" />
       
-      {/* Outdoor Light Source - Shining through door and windows */}
+      {/* Outdoor Light Source - Warm evening light */}
       <pointLight 
         position={[0, 5, 15]} 
-        intensity={2.0} 
+        intensity={1.5} 
         color="#FFE4B5" 
         distance={25}
         decay={1.5}
@@ -428,67 +544,67 @@ const CyberCafeRoom3D: React.FC<{
       {/* Additional outdoor ambient lighting */}
       <pointLight 
         position={[-5, 6, 12]} 
-        intensity={1.5} 
+        intensity={1.0} 
         color="#FFFACD" 
         distance={20}
         decay={2}
       />
       <pointLight 
         position={[5, 6, 12]} 
-        intensity={1.5} 
+        intensity={1.0} 
         color="#FFFACD" 
         distance={20}
         decay={2}
       />
       
-      {/* Enhanced Atmospheric Lighting */}
-      <ambientLight intensity={0.25} color="#87CEEB" />
-      <pointLight position={[3, 6, 0]} intensity={1.2} color="#00ffff" distance={20} decay={1.5} />
-      <pointLight position={[6, 6, 0]} intensity={1.2} color="#ff00ff" distance={20} decay={1.5} />
-      <pointLight position={[9, 6, 0]} intensity={1.2} color="#ffff00" distance={20} decay={1.5} />
-      <pointLight position={[-6, 6, 4]} intensity={1.0} color="#ff6600" distance={15} decay={1.5} />
-      <pointLight position={[0, 6, -5]} intensity={0.8} color="#00ff66" distance={15} decay={1.5} />
+      {/* Warm Ambient Lighting */}
+      <ambientLight intensity={0.4} color="#FFF8DC" />
       
-      {/* Additional accent lights */}
-      <pointLight position={[3, 3, 0]} intensity={0.6} color="#ff0080" distance={10} decay={2} />
-      <pointLight position={[6, 3, 0]} intensity={0.6} color="#8000ff" distance={10} decay={2} />
-      <pointLight position={[9, 3, 0]} intensity={0.6} color="#00ff80" distance={10} decay={2} />
+      {/* Warm ceiling lights */}
+      <pointLight position={[2, 5.5, 0]} intensity={0.8} color="#FFD700" distance={12} decay={1.5} />
+      <pointLight position={[4, 5.5, 0]} intensity={0.8} color="#FFA500" distance={12} decay={1.5} />
+      <pointLight position={[6, 5.5, 0]} intensity={0.8} color="#FFD700" distance={12} decay={1.5} />
       
-      {/* Spot Lights for Computer Stations */}
+      {/* Warm accent lights */}
+      <pointLight position={[-3, 5, 2]} intensity={0.6} color="#FFA500" distance={10} decay={2} />
+      <pointLight position={[0, 5, -3]} intensity={0.6} color="#FFD700" distance={10} decay={2} />
+      <pointLight position={[3, 5, 3]} intensity={0.6} color="#FFA500" distance={10} decay={2} />
+      
+      {/* Warm Spot Lights for Computer Stations */}
       <spotLight 
-        position={[3, 8, 0]} 
+        position={[3, 6, 0]} 
         target-position={[3, 0, 0]}
-        intensity={0.7} 
-        color="#00ffff" 
+        intensity={0.5} 
+        color="#FFD700" 
         angle={Math.PI / 2.5}
         penumbra={0.3}
-        distance={20}
+        distance={15}
       />
       <spotLight 
-        position={[6, 8, 0]} 
+        position={[6, 6, 0]} 
         target-position={[6, 0, 0]}
-        intensity={0.7} 
-        color="#ff00ff" 
+        intensity={0.5} 
+        color="#FFA500" 
         angle={Math.PI / 2.5}
         penumbra={0.3}
-        distance={20}
+        distance={15}
       />
       <spotLight 
-        position={[9, 8, 0]} 
-        target-position={[9, 0, 0]}
-        intensity={0.7} 
-        color="#ffff00" 
+        position={[5.5, 6, 0]} 
+        target-position={[5.5, 0, 0]}
+        intensity={0.5} 
+        color="#FFD700" 
         angle={Math.PI / 2.5}
         penumbra={0.3}
-        distance={20}
+        distance={15}
       />
       
       {/* Cashier Area Spot Light */}
       <spotLight 
-        position={[-6, 8, 6]} 
-        target-position={[-6, 0, 6]}
-        intensity={0.8} 
-        color="#ffff00" 
+        position={[-4, 6, 4]} 
+        target-position={[-4, 0, 4]}
+        intensity={0.6} 
+        color="#FFD700" 
         angle={Math.PI / 4}
         penumbra={0.3}
         distance={12}
@@ -504,17 +620,14 @@ const CyberCafe3D: React.FC = () => {
     lookAt: [number, number, number];
   } | null>(null);
 
-
-  // resetCamera function removed - UI overlay was removed
-
   const handleAnimationComplete = () => {
     // Animation complete - camera stays unlocked for user control
   };
 
   return (
     <div className="w-full h-screen bg-black">
-      <Canvas camera={{ position: [-2, 3, 10], fov: 80 }}>
-        <fog attach="fog" args={['#0a0a1a', 5, 25]} />
+      <Canvas camera={{ position: [-1.5, 4, 6], fov: 90 }}>
+        <fog attach="fog" args={['#2F1B14', 8, 15]} />
         <CameraBoundaryController />
         <CyberCafeRoom3D onCameraTargetChange={setCameraTarget} />
         <CameraController 
@@ -526,8 +639,8 @@ const CyberCafe3D: React.FC = () => {
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={2}
-          maxDistance={15}
+          minDistance={1}
+          maxDistance={8}
           maxPolarAngle={Math.PI / 2}
           minPolarAngle={Math.PI / 6}
           // Restrict camera to stay within room boundaries
@@ -538,14 +651,6 @@ const CyberCafe3D: React.FC = () => {
         />
       </Canvas>
       
-      {/* Controls Info */}
-      <div className="absolute bottom-4 right-4 bg-black bg-opacity-70 border border-purple-400 rounded-lg p-4 text-white font-mono text-sm">
-        <div className="text-purple-400 font-bold mb-2">3D CONTROLS</div>
-        <div>🖱️ Left Click + Drag: Rotate</div>
-        <div>🖱️ Right Click + Drag: Pan</div>
-        <div>🖱️ Scroll: Zoom</div>
-        <div>⌨️ WASD: Move Camera</div>
-      </div>
     </div>
   );
 };

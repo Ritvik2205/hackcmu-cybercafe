@@ -6,6 +6,7 @@ import GameScreen from './pages/GameScreen';
 import RetroDesktop from './pages/RetroDesktop';
 import './App.css';
 import { CyberCafe3D } from './components/3D';
+import WelcomeScreen from './components/WelcomeScreen';
 import { ClerkProvider } from '@clerk/clerk-react';
 
 function App() {
@@ -31,7 +32,8 @@ function App() {
     >
       <div className="App">
         <Routes>
-          <Route path="/" element={<CyberCafe3D />} />
+          <Route path="/" element={<WelcomeScreen />} />
+          <Route path="/cybercafe" element={<CyberCafe3D />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />

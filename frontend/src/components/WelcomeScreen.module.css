@@ -1,0 +1,40 @@
+.background {
+  height: 100vh;
+  width: 100%;
+  background: url("/cybercafe_with_black_door_1.png") no-repeat center center;
+  background-size: 75% 71%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  perspective: 900px;
+  transform: scale(1.2);
+  transition: 1s ease;
+}
+
+.background.active {
+  transform: translate(-20%, -50%) scale(20);
+}
+
+.door {
+  width: 30%;
+  height: 200%;
+  background: url("/door.png");
+  position: absolute;
+  background-repeat: no-repeat;
+  top: 2.5%;
+  left: 43.95%;
+  transform: translate(-50%, -10%) scale(0.35);
+  transform-origin: right center;
+  backface-visibility: hidden;
+  will-change: transform;
+  cursor: pointer;
+  z-index: 2;
+  transition: transform 1s ease, opacity 0.6s ease 0.2s;
+}
+
+.door.open {
+  transform: translate(-50%, -10%) scale(0.35) rotateY(90deg);
+  opacity: 0;
+}

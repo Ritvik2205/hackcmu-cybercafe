@@ -18,8 +18,6 @@ const ComputerModel = ({ position, onClick, isOccupied, rotation }: {
     return scene.clone();
   }, [scene]);
   
-  // Debug: Log when model loads
-  console.log('ComputerModel loaded at position:', position);
 
   return (
     <group

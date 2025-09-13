@@ -28,84 +28,80 @@ const AnimatedNeonLight: React.FC<{
   );
 };
 
-// Cyberpunk Neon Lighting System
-export const CyberpunkNeonLights: React.FC<{ computers: any[] }> = ({ computers }) => {
+// Warm Ambient Lighting System
+export const CyberpunkNeonLights: React.FC<{ computers: any[] }> = () => {
   return (
     <group>
-      {/* Main Ceiling Neon Cross */}
+      {/* Main Ceiling Warm Light Cross */}
       <AnimatedNeonLight
-        position={[0, 7.95, 0]}
-        color="#00ffff"
-        size={[18, 0.05, 0.1]}
+        position={[0, 5.95, 0]}
+        color="#FFD700"
+        size={[12, 0.05, 0.1]}
       />
       
-      {/* Corner Neon Lights with different speeds */}
+      {/* Corner Warm Lights */}
       <AnimatedNeonLight
-        position={[-9.5, 7.95, -9.5]}
-        color="#ffff00"
+        position={[-6.5, 5.95, -6.5]}
+        color="#FFA500"
         size={[0.1, 0.05, 0.1]}
       />
       <AnimatedNeonLight
-        position={[9.5, 7.95, -9.5]}
-        color="#ff6600"
+        position={[6.5, 5.95, -6.5]}
+        color="#FFD700"
         size={[0.1, 0.05, 0.1]}
       />
       <AnimatedNeonLight
-        position={[-9.5, 7.95, 9.5]}
-        color="#ff0066"
+        position={[-6.5, 5.95, 6.5]}
+        color="#FFA500"
         size={[0.1, 0.05, 0.1]}
       />
       <AnimatedNeonLight
-        position={[9.5, 7.95, 9.5]}
-        color="#00ff66"
+        position={[6.5, 5.95, 6.5]}
+        color="#FFD700"
         size={[0.1, 0.05, 0.1]}
       />
       
-      {/* Wall Neon Strips */}
+      {/* Wall Warm Light Strips */}
       {/* Back Wall */}
       <AnimatedNeonLight
-        position={[0, 6, -9.95]}
-        color="#00ffff"
-        size={[18, 0.05, 0.1]}
+        position={[0, 4, -6.95]}
+        color="#FFD700"
+        size={[12, 0.05, 0.1]}
       />
       <AnimatedNeonLight
-        position={[0, 2, -9.95]}
-        color="#ff00ff"
-        size={[18, 0.05, 0.1]}
+        position={[0, 2, -6.95]}
+        color="#FFA500"
+        size={[12, 0.05, 0.1]}
       />
       
       {/* Side Walls */}
       <AnimatedNeonLight
-        position={[-9.95, 6, 0]}
-        color="#ffff00"
-        size={[0.1, 0.05, 18]}
-
+        position={[-6.95, 4, 0]}
+        color="#FFA500"
+        size={[0.1, 0.05, 12]}
       />
       <AnimatedNeonLight
-        position={[-9.95, 2, 0]}
-        color="#ff6600"
-        size={[0.1, 0.05, 18]}
-
+        position={[-6.95, 2, 0]}
+        color="#FFD700"
+        size={[0.1, 0.05, 12]}
       />
       
       <AnimatedNeonLight
-        position={[9.95, 6, 0]}
-        color="#ff0066"
-        size={[0.1, 0.05, 18]}
-
+        position={[6.95, 4, 0]}
+        color="#FFD700"
+        size={[0.1, 0.05, 12]}
       />
       <AnimatedNeonLight
-        position={[9.95, 2, 0]}
-        color="#00ff66"
-        size={[0.1, 0.05, 18]}
-
+        position={[6.95, 2, 0]}
+        color="#FFA500"
+        size={[0.1, 0.05, 12]}
       />
       
-      {/* Floor Neon Grid */}
+      {/* Floor Warm Light Grid */}
       <AnimatedNeonLight
         position={[0, 0.01, 0]}
-        color="#00ffff"
-        size={[18, 0.02, 0.05]}
+        color="#FFD700"
+        size={[12, 0.02, 0.05]}
         rotation={[-Math.PI / 2, 0, 0]}
       />
       
