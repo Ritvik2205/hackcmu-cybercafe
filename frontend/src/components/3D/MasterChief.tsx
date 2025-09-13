@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useGLTF, Text } from '@react-three/drei';
 import { Group } from 'three';
+import { useNavigate } from 'react-router-dom';
 // import { ClerkProvider } from '@clerk/clerk-react'
 
 // const pubKey='pk_test_c2F2ZWQtaWd1YW5hLTkuY2xlcmsuYWNjb3VudHMuZGV2JA';
@@ -58,6 +59,17 @@ const MasterChiefModel = ({ position, onClick, isActive }: {
 }) => {
   const { scene } = useGLTF('/master-chief/source/steve.gltf');
   const groupRef = useRef<Group>(null);
+  const navigate = useNavigate();
+
+  const handleLoginClick = (e: any) => {
+    e.stopPropagation(); // Prevent the parent onClick from firing
+    navigate('/login');
+  };
+
+  const handleAddCreditsClick = (e: any) => {
+    e.stopPropagation(); // Prevent the parent onClick from firing
+    navigate('/'); // Redirect to main cyber cafe where user can interact with cashier
+  };
 
   return (
     <group
@@ -79,29 +91,34 @@ const MasterChiefModel = ({ position, onClick, isActive }: {
         />
       )}
 
-      {isActive && (<Text
-        position={[-1, 2.5, -1]}
-        fontSize={0.4}
-        color="#d6d91e"
-        anchorX="center"
-        anchorY="middle"
-        rotation={[0,-Math.PI/2, 0]}
-      >
-        LOGIN
-      </Text>)}
-      {/* I would like to make this button clickable and when clicked, redirect to /login */}
+      {isActive && (
+        <group onClick={handleLoginClick}>
+          <Text
+            position={[-1, 2.5, -1]}
+            fontSize={0.4}
+            color="#d6d91e"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0,-Math.PI/2, 0]}
+          >
+            LOGIN
+          </Text>
+        </group>
+      )}
 
       {isActive && (
-        <Text
-        position={[1, 2.5, 1]}
-        fontSize={0.4}
-        color="#d6d91e"
-        anchorX="center"
-        anchorY="middle"
-        rotation={[0,-Math.PI/2, 0]}
-      >
-        ADD CREDITS
-      </Text>
+        <group onClick={handleAddCreditsClick}>
+          <Text
+            position={[1, 2.5, 1]}
+            fontSize={0.4}
+            color="#d6d91e"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0,-Math.PI/2, 0]}
+          >
+            ADD CREDITS
+          </Text>
+        </group>
       )}
     </group>
   );
