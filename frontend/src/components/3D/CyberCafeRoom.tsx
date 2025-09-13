@@ -30,6 +30,13 @@ const CameraBoundaryController: React.FC = () => {
   return null;
 };
 
+const getRandomChoice =(arr: string[]) =>{
+  const randomIndex = Math.floor(Math.random() * arr.length);
+  return arr[randomIndex];
+}
+
+const colors=["#fcba03","#1a2999", "#37a62b", "#e81405"];
+
 // Camera Controller Component with GSAP
 const CameraController: React.FC<{ 
   targetPosition?: [number, number, number], 
@@ -279,6 +286,15 @@ const CyberCafeRoom3D: React.FC<{
         />
       </group>
       
+      {/* Computer users */}
+      {computers.filter(computers => computers.isOccupied).map((computer) => (
+        <User3D
+          position={[computer.position[0], computer.position[1], computer.position[2]-0.7]}
+          name=""
+          color={getRandomChoice(colors)}
+        />
+      ))}
+
       {/* Computer Stations */}
       {computers.map((computer) => (
         <group key={computer.id}>
