@@ -281,24 +281,24 @@ const CyberCafeRoom3D: React.FC<{
   
   const [computers] = useState([
     // Vertical Column 1 (Back to Front) - Right side
-    { id: 1, position: [0, 1, -4.5] as [number, number, number], isOccupied: false },
-    { id: 2, position: [0, 1, -2.5] as [number, number, number], isOccupied: true, currentUser: 'gamer_123' },
-    { id: 3, position: [0, 1, -0.5] as [number, number, number], isOccupied: false },
-    { id: 4, position: [0, 1, 1.5] as [number, number, number], isOccupied: true, currentUser: 'retro_player' },
+    { id: 1, position: [0, 1, -6.5] as [number, number, number], isOccupied: false },
+    { id: 2, position: [0, 1, -4] as [number, number, number], isOccupied: true, currentUser: 'gamer_123' },
+    { id: 3, position: [0, 1, -1.5] as [number, number, number], isOccupied: false },
+    { id: 4, position: [0, 1, 1.0] as [number, number, number], isOccupied: true, currentUser: 'retro_player' },
     { id: 5, position: [0, 1, 3.5] as [number, number, number], isOccupied: false },
     
     // Vertical Column 2 (Back to Front) - Right side
-    { id: 6, position: [4, 1, -4] as [number, number, number], isOccupied: true, currentUser: 'cyber_ninja' },
-    { id: 7, position: [4, 1, -2] as [number, number, number], isOccupied: false },
-    { id: 8, position: [4, 1, 0] as [number, number, number], isOccupied: false },
-    { id: 9, position: [4, 1, 2] as [number, number, number], isOccupied: false },
+    { id: 6, position: [4, 1, -6] as [number, number, number], isOccupied: true, currentUser: 'cyber_ninja' },
+    { id: 7, position: [4, 1, -3.5] as [number, number, number], isOccupied: false },
+    { id: 8, position: [4, 1, -1] as [number, number, number], isOccupied: false },
+    { id: 9, position: [4, 1, 1.5] as [number, number, number], isOccupied: false },
     { id: 10, position: [4, 1, 4] as [number, number, number], isOccupied: true, currentUser: 'pro_gamer' },
     
     // Vertical Column 3 (Back to Front) - Right side
-    { id: 11, position: [8, 1, -4] as [number, number, number], isOccupied: false },
-    { id: 12, position: [8, 1, -2] as [number, number, number], isOccupied: false },
-    { id: 13, position: [8, 1, 0] as [number, number, number], isOccupied: true, currentUser: 'streamer_x' },
-    { id: 14, position: [8, 1, 2] as [number, number, number], isOccupied: false },
+    { id: 11, position: [8, 1, -6] as [number, number, number], isOccupied: false },
+    { id: 12, position: [8, 1, -3.5] as [number, number, number], isOccupied: false },
+    { id: 13, position: [8, 1, -1] as [number, number, number], isOccupied: true, currentUser: 'streamer_x' },
+    { id: 14, position: [8, 1, 1.5] as [number, number, number], isOccupied: false },
     { id: 15, position: [8, 1, 4] as [number, number, number], isOccupied: false },
   ]);
 
@@ -313,7 +313,8 @@ const CyberCafeRoom3D: React.FC<{
   };
 
   const handleCashierClick = () => {
-    setCashierActive(!cashierActive);
+    // setCashierActive(!cashierActive);
+    setCashierActive(true);
     // Cashier is positioned at [-6, 0, 3.5]
     onCameraTargetChange({
       position: [-8, 2, 8],
@@ -367,7 +368,7 @@ const CyberCafeRoom3D: React.FC<{
       {/* Computer users */}
       {computers.filter(computers => computers.isOccupied).map((computer) => (
         <User3D
-          position={[computer.position[0], computer.position[1], computer.position[2]-0.7]}
+          position={[computer.position[0], computer.position[1], computer.position[2]-0.9]}
           name=""
           color={getRandomChoice(colors)}
         />

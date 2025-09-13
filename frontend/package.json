@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
+    "@clerk/clerk-react": "^5.47.0",
+    "@clerk/nextjs": "^6.32.0",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.3.0",
     "@tailwindcss/postcss": "^4.1.13",
