@@ -1,7 +1,6 @@
 import { SignUp, SignedOut, SignedIn } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom';
 import React, { useRef, useState, useEffect} from 'react';
-import axios from 'axios';
 import { useAuth } from "@clerk/clerk-react";
 
 interface TextFieldProps {
@@ -74,6 +73,11 @@ const Payment: React.FC = () => {
       }
   });
 
+  const goHome=(()=>{
+    const navigate = useNavigate();
+    navigate('/');
+  });
+
   return (<section>
     <div className="product">
       <h2>Add credit to your account</h2>
@@ -81,30 +85,41 @@ const Payment: React.FC = () => {
       <h3>Credits for the cyber cafe</h3>
       <h5>$1.00</h5>
       </div>
+      <div>
       <TextField
       id='quantity'
       value={inputValue}
       onChange={textChange}
-      type='text'/>
+      type='text'
+      placeholder='Credit to buy'/>
+      </div>
+      <div>
       <TextField
       id='credit_card'
       value={creditCard}
       onChange={textChangeCredit}
-      type='text'/>
+      type='text'
+      placeholder='Credit card number'/>
+      </div>
+      <div>
       <TextField
       id='cvv'
       value={CVV}
       onChange={textChangeCVV}
-      type='text'/>
+      type='text'
+      placeholder='CVV'/>
+      </div>
       <TextField
       id='exp_date'
       value={expDate}
       onChange={textChangeexp}
-      type='text'/>
+      type='text'
+      placeholder='Expiration date'/>
     </div>
     <button type="submit" onClick={processPayment}>
+      Submit
     </button>
-    <button type="back"></button>
+    <button type="back" onClick={goHome}>Back</button>
   </section>);
 };
 
