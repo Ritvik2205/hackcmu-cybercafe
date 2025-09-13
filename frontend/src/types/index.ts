@@ -89,3 +89,10 @@ export enum GameType {
   TETRIS = 'tetris',
   PONG = 'pong',
 }
+
+// src/types/global.d.ts
+interface Window {
+  PACMAN?: {
+    init: (el: HTMLElement, assetPath: string) => void;
+  };
+}

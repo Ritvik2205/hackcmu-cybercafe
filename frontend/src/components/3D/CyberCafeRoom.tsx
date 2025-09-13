@@ -1,12 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Box, Plane } from '@react-three/drei';
+import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { CyberpunkNeonLights } from './NeonLights';
 import MasterChiefModel from './MasterChief';
 import ComputerModel from './ComputerModel';
 import AntiqueDesk from './AntiqueDesk';
+import Shelf from './Shelf';
+// import CeilingPipes from './CeilingPipes'; // Temporarily disabled
 
 // Camera Boundary Controller
 const CameraBoundaryController: React.FC = () => {
@@ -114,7 +117,7 @@ const CameraController: React.FC<{
 
 // Cashier3D component removed - replaced with MasterChiefModel
 
-const User3D: React.FC<{ position: [number, number, number]; name: string, color: string }> = ({ position, name, color }) => {
+const User3D: React.FC<{ position: [number, number, number]; name: string, color: string }> = ({ position, color }) => {
   const meshRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
@@ -198,6 +201,13 @@ const Room: React.FC = () => {
         <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
       </Plane>
       
+      {/* Shelves on Back Wall */}
+      <Shelf position={[-7, 2, -9]} />
+      <Shelf position={[-3, 2, -9]} />
+      <Shelf position={[1, 2, -9]} />
+      <Shelf position={[5, 2, -9]} />
+      <Shelf position={[7.5, 2, -9]} />
+      
       {/* Left Wall with Windows */}
       <Plane args={[20, 8]} rotation={[0, Math.PI / 2, 0]} position={[-10, 4, 0]}>
         <meshLambertMaterial color="#1a1a1a" />
@@ -255,6 +265,9 @@ const Room: React.FC = () => {
       <Box args={[0.1, 0.1, 18]} position={[0, 7.9, 0]}>
         <meshBasicMaterial color="#00ffff" />
       </Box>
+      
+      {/* Ceiling Pipes - Multiple instances across the ceiling */}
+      {/* <CeilingPipes position={[6, 0.5, -6]} /> */}
     </>
   );
 };
@@ -264,6 +277,7 @@ const CyberCafeRoom3D: React.FC<{
   onCameraTargetChange: (target: { position: [number, number, number]; lookAt: [number, number, number] } | null) => void;
 }> = ({ onCameraTargetChange }) => {
   const [cashierActive, setCashierActive] = useState(false);
+  const navigate = useNavigate();
   
   const [computers] = useState([
     // Vertical Column 1 (Back to Front) - Right side
@@ -315,6 +329,11 @@ const CyberCafeRoom3D: React.FC<{
         position: [computer.position[0] - 3, 2, computer.position[2] + 2],
         lookAt: [computer.position[0], 1, computer.position[2]]
       });
+      
+      // Redirect to desktop page after camera animation (2 seconds)
+      setTimeout(() => {
+        navigate('/desktop');
+      }, 2000);
     }
   };
 
@@ -396,6 +415,32 @@ const CyberCafeRoom3D: React.FC<{
       <directionalLight position={[10, 5, 0]} intensity={0.4} color="#87CEEB" />
       <directionalLight position={[0, 5, -10]} intensity={0.4} color="#87CEEB" />
       
+      {/* Outdoor Light Source - Shining through door and windows */}
+      <pointLight 
+        position={[0, 5, 15]} 
+        intensity={2.0} 
+        color="#FFE4B5" 
+        distance={25}
+        decay={1.5}
+        castShadow
+      />
+      
+      {/* Additional outdoor ambient lighting */}
+      <pointLight 
+        position={[-5, 6, 12]} 
+        intensity={1.5} 
+        color="#FFFACD" 
+        distance={20}
+        decay={2}
+      />
+      <pointLight 
+        position={[5, 6, 12]} 
+        intensity={1.5} 
+        color="#FFFACD" 
+        distance={20}
+        decay={2}
+      />
+      
       {/* Enhanced Atmospheric Lighting */}
       <ambientLight intensity={0.25} color="#87CEEB" />
       <pointLight position={[3, 6, 0]} intensity={1.2} color="#00ffff" distance={20} decay={1.5} />
@@ -460,9 +505,7 @@ const CyberCafe3D: React.FC = () => {
   } | null>(null);
 
 
-  const resetCamera = () => {
-    setCameraTarget(null);
-  };
+  // resetCamera function removed - UI overlay was removed
 
   const handleAnimationComplete = () => {
     // Animation complete - camera stays unlocked for user control
@@ -494,28 +537,6 @@ const CyberCafe3D: React.FC = () => {
           target={[0, 0, 0]}
         />
       </Canvas>
-      
-      {/* UI Overlay */}
-      <div className="absolute top-4 left-4 bg-black bg-opacity-70 border border-cyan-400 rounded-lg p-4 text-white font-mono">
-        <h2 className="text-xl font-bold text-cyan-400 mb-2">CYBER CAFÉ 3D</h2>
-        <p className="text-sm text-gray-300 mb-2">
-          • Click on cashier desk or Master Chief to interact<br/>
-          • Click on computer screens to view them<br/>
-          • Use mouse to rotate view (camera stays in room)<br/>
-          • Scroll to zoom in/out<br/>
-          • Natural lighting from windows<br/>
-          • Hover over objects for interaction
-        </p>
-        <div className="text-green-400 text-sm mb-3">
-          STATUS: ACTIVE | TIME: {new Date().toLocaleTimeString()}
-        </div>
-        <button 
-          onClick={resetCamera}
-          className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-xs font-bold transition-colors"
-        >
-          🔄 RESET CAMERA
-        </button>
-      </div>
       
       {/* Controls Info */}
       <div className="absolute bottom-4 right-4 bg-black bg-opacity-70 border border-purple-400 rounded-lg p-4 text-white font-mono text-sm">
