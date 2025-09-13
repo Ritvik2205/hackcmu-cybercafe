@@ -1,225 +1,113 @@
-import React, { useRef, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Box, Plane } from '@react-three/drei';
+import React, { useRef, useState, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, Box, Plane } from '@react-three/drei';
 import * as THREE from 'three';
+import { gsap } from 'gsap';
 import { CyberpunkNeonLights } from './NeonLights';
+import MasterChiefModel from './MasterChief';
+import ComputerModel from './ComputerModel';
+import AntiqueDesk from './AntiqueDesk';
 
-// 3D Cashier Desk Component
-const CashierDesk3D: React.FC<{ position: [number, number, number] }> = ({ position }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
-    }
+// Camera Boundary Controller
+const CameraBoundaryController: React.FC = () => {
+  const { camera } = useThree();
+  
+  useFrame(() => {
+    // Define room boundaries (with some margin)
+    const roomMinX = -9;
+    const roomMaxX = 9;
+    const roomMinZ = -9;
+    const roomMaxZ = 9;
+    const roomMinY = 1;
+    const roomMaxY = 7;
+    
+    // Clamp camera position to room boundaries
+    camera.position.x = Math.max(roomMinX, Math.min(roomMaxX, camera.position.x));
+    camera.position.y = Math.max(roomMinY, Math.min(roomMaxY, camera.position.y));
+    camera.position.z = Math.max(roomMinZ, Math.min(roomMaxZ, camera.position.z));
   });
-
-  return (
-    <group position={position}>
-      {/* Desk Base */}
-      <Box args={[5, 0.2, 2.5]} position={[0, 0.1, 0]}>
-        <meshLambertMaterial color="#8B4513" />
-      </Box>
-      
-      {/* Desk Top */}
-      <Box args={[5.2, 0.1, 2.7]} position={[0, 0.25, 0]}>
-        <meshLambertMaterial color="#654321" />
-      </Box>
-      
-      {/* Computer Monitor on Desk */}
-      <Box args={[1.8, 0.6, 0.1]} position={[0, 0.7, 0]}>
-        <meshLambertMaterial color="#333" />
-      </Box>
-      
-      {/* Monitor Screen */}
-      <Box args={[1.7, 0.5, 0.05]} position={[0, 0.7, 0.06]}>
-        <meshBasicMaterial color="#00ff00" />
-      </Box>
-      
-      {/* Register/Cash Drawer */}
-      <Box args={[1.6, 0.4, 0.3]} position={[1, 0.3, 0]}>
-        <meshLambertMaterial color="#C0C0C0" />
-      </Box>
-      
-      {/* Name Label */}
-      <Text
-        position={[0, 1.2, 0]}
-        fontSize={0.2}
-        color="#00ffff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        CASHIER DESK
-      </Text>
-      
-      {/* Interaction Area */}
-      <Plane
-        args={[5, 2.5]}
-        position={[0, 0.3, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <meshBasicMaterial transparent opacity={0} />
-      </Plane>
-    </group>
-  );
+  
+  return null;
 };
 
-// 3D Computer Station Component
-const ComputerStation3D: React.FC<{ 
-  position: [number, number, number]; 
-  id: number;
-  isOccupied: boolean;
-  currentUser?: string;
-}> = ({ position, id, isOccupied, currentUser }) => {
-  const meshRef = useRef<THREE.Group>(null);
+// Camera Controller Component with GSAP
+const CameraController: React.FC<{ 
+  targetPosition?: [number, number, number], 
+  targetLookAt?: [number, number, number],
+  duration?: number,
+  onAnimationComplete?: () => void
+}> = ({ targetPosition, targetLookAt, duration = 2, onAnimationComplete }) => {
+  const { camera } = useThree();
+  const animationRef = useRef<gsap.core.Timeline | null>(null);
 
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime + id) * 0.05;
+  useEffect(() => {
+    if (targetPosition && targetLookAt) {
+      // Kill any existing animation
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
+
+
+      // Get current look-at target from camera
+      const currentLookAtTarget = new THREE.Vector3();
+      camera.getWorldDirection(currentLookAtTarget);
+      currentLookAtTarget.multiplyScalar(10);
+      currentLookAtTarget.add(camera.position);
+
+      // Create GSAP timeline
+      const timeline = gsap.timeline({
+        onComplete: onAnimationComplete
+      });
+
+      // Animate camera position
+      timeline.to(camera.position, {
+        x: targetPosition[0],
+        y: targetPosition[1],
+        z: targetPosition[2],
+        duration: duration,
+        ease: "power2.inOut"
+      }, 0);
+
+      // Animate look-at target directly
+      const targetLookAtVector = new THREE.Vector3(...targetLookAt);
+      timeline.to({}, {
+        duration: duration,
+        ease: "power2.inOut",
+        onUpdate: function() {
+          const progress = this.progress();
+          // Interpolate between current look-at and target look-at
+          const interpolatedLookAt = new THREE.Vector3().lerpVectors(
+            currentLookAtTarget,
+            targetLookAtVector,
+            progress
+          );
+          camera.lookAt(interpolatedLookAt);
+        }
+      }, 0);
+
+      animationRef.current = timeline;
     }
-  });
+  }, [targetPosition, targetLookAt, duration, camera, onAnimationComplete]);
 
-  return (
-    <group ref={meshRef} position={position}>
-      {/* Desk */}
-      <Box args={[3.2, 0.1, 1.2]} position={[0, 0.05, 0]}>
-        <meshLambertMaterial color={isOccupied ? "#4a4a4a" : "#666"} />
-      </Box>
-      
-      {/* Desk Legs */}
-      {[-1.5, 1.5].map((x) => 
-        [-0.55, 0.55].map((z) => (
-          <Box key={`${x}-${z}`} args={[0.05, 1.8, 0.05]} position={[x, -0.4, z]}>
-            <meshLambertMaterial color="#333" />
-          </Box>
-        ))
-      )}
-      
-      {/* Monitor */}
-      <Box args={[2.4, 0.7, 0.08]} position={[0, 0.6, 0]}>
-        <meshLambertMaterial color="#222" />
-      </Box>
-      
-      {/* Monitor Screen */}
-      <Box args={[2.3, 0.6, 0.03]} position={[0, 0.6, 0.05]}>
-        <meshLambertMaterial color={isOccupied ? "#00ff00" : "#001100"} />
-      </Box>
-      
-      {/* Monitor Stand */}
-      <Box args={[0.5, 0.15, 0.6]} position={[0, 0.3, 0]}>
-        <meshLambertMaterial color="#444" />
-      </Box>
-      
-      {/* Keyboard */}
-      <Box args={[2.2, 0.05, 0.3]} position={[0, 0.18, 0.3]}>
-        <meshLambertMaterial color="#111" />
-      </Box>
-      
-      {/* Mouse */}
-      <Box args={[0.3, 0.08, 0.12]} position={[0.5, 0.2, 0.3]}>
-        <meshLambertMaterial color="#333" />
-      </Box>
-      
-      {/* Status Indicator */}
-      <Box args={[0.3, 0.15, 0.15]} position={[0, 1.0, 0]}>
-        <meshLambertMaterial color={isOccupied ? "#ff0000" : "#00ff00"} />
-      </Box>
-      
-      {/* User Label */}
-      <Text
-        position={[0, 1, 0]}
-        fontSize={0.1}
-        color={isOccupied ? "#ffff00" : "#666666"}
-        anchorX="center"
-        anchorY="middle"
-      >
-        PC-{id.toString().padStart(2, '0')} {isOccupied ? `\n${currentUser}` : '\nAVAILABLE'}
-      </Text>
-      
-      {/* Interaction Area */}
-      <Plane
-        args={[3.2, 1.2]}
-        position={[0, 0.1, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <meshBasicMaterial transparent opacity={0} />
-      </Plane>
-    </group>
-  );
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
+    };
+  }, []);
+
+  return null;
 };
 
-// 3D Cashier Character
-const Cashier3D: React.FC<{ position: [number, number, number]; name: string }> = ({ position, name }) => {
-  const meshRef = useRef<THREE.Group>(null);
+// CashierDesk3D component removed - replaced with AntiqueDesk and ComputerModel
 
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.02;
-    }
-  });
+// ComputerStation3D component removed - replaced with ComputerModel
 
-  return (
-    <group ref={meshRef} position={position}>
-      {/* Cashier Body */}
-      <Box args={[0.4, 1.2, 0.3]} position={[0, 0.6, 0]}>
-        <meshLambertMaterial color="#4169E1" />
-      </Box>
-      
-      {/* Head */}
-      <Box args={[0.3, 0.3, 0.25]} position={[0, 1.5, 0]}>
-        <meshLambertMaterial color="#FDBCB4" />
-      </Box>
-      
-      {/* Eyes */}
-      <Box args={[0.05, 0.05, 0.02]} position={[-0.08, 1.55, 0.12]}>
-        <meshLambertMaterial color="#000" />
-      </Box>
-      <Box args={[0.05, 0.05, 0.02]} position={[0.08, 1.55, 0.12]}>
-        <meshLambertMaterial color="#000" />
-      </Box>
-      
-      {/* Arms */}
-      <Box args={[0.15, 0.6, 0.15]} position={[-0.4, 0.7, 0]}>
-        <meshLambertMaterial color="#FDBCB4" />
-      </Box>
-      <Box args={[0.15, 0.6, 0.15]} position={[0.4, 0.7, 0]}>
-        <meshLambertMaterial color="#FDBCB4" />
-      </Box>
-      
-      {/* Legs */}
-      <Box args={[0.15, 0.8, 0.15]} position={[-0.1, -0.4, 0]}>
-        <meshLambertMaterial color="#000080" />
-      </Box>
-      <Box args={[0.15, 0.8, 0.15]} position={[0.1, -0.4, 0]}>
-        <meshLambertMaterial color="#000080" />
-      </Box>
-      
-      {/* Name Label */}
-      <Text
-        position={[0, 2.2, 0]}
-        fontSize={0.15}
-        color="#00ffff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {name}
-      </Text>
-      
-      {/* Title Label */}
-      <Text
-        position={[0, 2, 0]}
-        fontSize={0.1}
-        color="#ffff00"
-        anchorX="center"
-        anchorY="middle"
-      >
-        CASHIER
-      </Text>
-    </group>
-  );
-};
+// Cashier3D component removed - replaced with MasterChiefModel
 
-// Room Environment
+// Room Environment with Windows and Natural Lighting
 const Room: React.FC = () => {
   return (
     <>
@@ -228,20 +116,65 @@ const Room: React.FC = () => {
         <meshLambertMaterial color="#2a2a2a" />
       </Plane>
       
-      {/* Walls */}
-      {/* Back Wall */}
+      {/* Walls with Windows */}
+      {/* Back Wall with Windows */}
       <Plane args={[20, 8]} position={[0, 4, -10]}>
         <meshLambertMaterial color="#1a1a1a" />
       </Plane>
+      {/* Back Wall Windows */}
+      <Plane args={[4, 3]} position={[-6, 4, -9.99]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
+      <Plane args={[4, 3]} position={[0, 4, -9.99]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
+      <Plane args={[4, 3]} position={[6, 4, -9.99]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
       
-      {/* Left Wall */}
+      {/* Left Wall with Windows */}
       <Plane args={[20, 8]} rotation={[0, Math.PI / 2, 0]} position={[-10, 4, 0]}>
         <meshLambertMaterial color="#1a1a1a" />
       </Plane>
+      {/* Left Wall Windows */}
+      <Plane args={[4, 3]} rotation={[0, Math.PI / 2, 0]} position={[-9.99, 4, -6]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
+      <Plane args={[4, 3]} rotation={[0, Math.PI / 2, 0]} position={[-9.99, 4, 0]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
+      <Plane args={[4, 3]} rotation={[0, Math.PI / 2, 0]} position={[-9.99, 4, 6]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
       
-      {/* Right Wall */}
+      {/* Right Wall with Windows */}
       <Plane args={[20, 8]} rotation={[0, -Math.PI / 2, 0]} position={[10, 4, 0]}>
         <meshLambertMaterial color="#1a1a1a" />
+      </Plane>
+      {/* Right Wall Windows */}
+      <Plane args={[4, 3]} rotation={[0, -Math.PI / 2, 0]} position={[9.99, 4, -6]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
+      <Plane args={[4, 3]} rotation={[0, -Math.PI / 2, 0]} position={[9.99, 4, 0]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
+      <Plane args={[4, 3]} rotation={[0, -Math.PI / 2, 0]} position={[9.99, 4, 6]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
+      
+      {/* Front Wall (with entrance) - partial wall */}
+      <Plane args={[8, 8]} position={[-6, 4, 10]}>
+        <meshLambertMaterial color="#1a1a1a" />
+      </Plane>
+      <Plane args={[8, 8]} position={[6, 4, 10]}>
+        <meshLambertMaterial color="#1a1a1a" />
+      </Plane>
+      {/* Front Wall Windows */}
+      <Plane args={[3, 3]} position={[-3, 4, 9.99]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
+      </Plane>
+      <Plane args={[3, 3]} position={[3, 4, 9.99]}>
+        <meshBasicMaterial color="#87CEEB" transparent opacity={0.7} />
       </Plane>
       
       {/* Ceiling */}
@@ -261,59 +194,134 @@ const Room: React.FC = () => {
 };
 
 // Main 3D Cyber Café Room Component
-const CyberCafeRoom3D: React.FC = () => {
+const CyberCafeRoom3D: React.FC<{
+  onCameraTargetChange: (target: { position: [number, number, number]; lookAt: [number, number, number] } | null) => void;
+}> = ({ onCameraTargetChange }) => {
+  const [cashierActive, setCashierActive] = useState(false);
+  
   const [computers] = useState([
     // Vertical Column 1 (Back to Front) - Right side
-    { id: 1, position: [0, 0, -4] as [number, number, number], isOccupied: false },
-    { id: 2, position: [0, 0, -2] as [number, number, number], isOccupied: true, currentUser: 'gamer_123' },
-    { id: 3, position: [0, 0, 0] as [number, number, number], isOccupied: false },
-    { id: 4, position: [0, 0, 2] as [number, number, number], isOccupied: true, currentUser: 'retro_player' },
-    { id: 5, position: [0, 0, 4] as [number, number, number], isOccupied: false },
+    { id: 1, position: [0, 1, -4] as [number, number, number], isOccupied: false },
+    { id: 2, position: [0, 1, -2] as [number, number, number], isOccupied: true, currentUser: 'gamer_123' },
+    { id: 3, position: [0, 1, 0] as [number, number, number], isOccupied: false },
+    { id: 4, position: [0, 1, 2] as [number, number, number], isOccupied: true, currentUser: 'retro_player' },
+    { id: 5, position: [0, 1, 4] as [number, number, number], isOccupied: false },
     
     // Vertical Column 2 (Back to Front) - Right side
-    { id: 6, position: [4, 0, -4] as [number, number, number], isOccupied: true, currentUser: 'cyber_ninja' },
-    { id: 7, position: [4, 0, -2] as [number, number, number], isOccupied: false },
-    { id: 8, position: [4, 0, 0] as [number, number, number], isOccupied: false },
-    { id: 9, position: [4, 0, 2] as [number, number, number], isOccupied: false },
-    { id: 10, position: [4, 0, 4] as [number, number, number], isOccupied: true, currentUser: 'pro_gamer' },
+    { id: 6, position: [4, 1, -4] as [number, number, number], isOccupied: true, currentUser: 'cyber_ninja' },
+    { id: 7, position: [4, 1, -2] as [number, number, number], isOccupied: false },
+    { id: 8, position: [4, 1, 0] as [number, number, number], isOccupied: false },
+    { id: 9, position: [4, 1, 2] as [number, number, number], isOccupied: false },
+    { id: 10, position: [4, 1, 4] as [number, number, number], isOccupied: true, currentUser: 'pro_gamer' },
     
     // Vertical Column 3 (Back to Front) - Right side
-    { id: 11, position: [8, 0, -4] as [number, number, number], isOccupied: false },
-    { id: 12, position: [8, 0, -2] as [number, number, number], isOccupied: false },
-    { id: 13, position: [8, 0, 0] as [number, number, number], isOccupied: true, currentUser: 'streamer_x' },
-    { id: 14, position: [8, 0, 2] as [number, number, number], isOccupied: false },
-    { id: 15, position: [8, 0, 4] as [number, number, number], isOccupied: false },
+    { id: 11, position: [8, 1, -4] as [number, number, number], isOccupied: false },
+    { id: 12, position: [8, 1, -2] as [number, number, number], isOccupied: false },
+    { id: 13, position: [8, 1, 0] as [number, number, number], isOccupied: true, currentUser: 'streamer_x' },
+    { id: 14, position: [8, 1, 2] as [number, number, number], isOccupied: false },
+    { id: 15, position: [8, 1, 4] as [number, number, number], isOccupied: false },
   ]);
+
+  const handleCashierDeskClick = () => {
+    setCashierActive(true);
+    // Cashier desk is positioned at [-6, 0, 4]
+    // Flipped perspective: approach from the opposite side
+    onCameraTargetChange({
+      position: [-8, 2, 8],
+      lookAt: [0, 1, 2]
+    });
+  };
+
+  const handleCashierClick = () => {
+    setCashierActive(!cashierActive);
+    // Cashier is positioned at [-6, 0, 3.5]
+    onCameraTargetChange({
+      position: [-8, 2, 8],
+      lookAt: [0, 1, 2]
+    });
+  };
+
+  const handleComputerClick = (computerId: number) => {
+    const computer = computers.find(c => c.id === computerId);
+    if (computer) {
+      onCameraTargetChange({
+        position: [computer.position[0] - 3, 2, computer.position[2] + 2],
+        lookAt: [computer.position[0], 1, computer.position[2]]
+      });
+    }
+  };
 
   return (
     <group>
       {/* Room Environment */}
       <Room />
       
-      {/* Cashier Desk - Left side near entrance */}
-      <CashierDesk3D position={[-6, 0, 4]} />
-      
-      {/* Cashier - Behind the cashier desk */}
-      <Cashier3D position={[-6, 0, 3.5]} name="Alex Chen" />
+      {/* Cashier Station - Left side near entrance */}
+      <group>
+        {/* Antique Desk for cashier */}
+        <AntiqueDesk 
+          position={[-5, 1, 4]}
+        />
+        
+        {/* Computer on the cashier desk */}
+        <ComputerModel
+          position={[-5, 1, 4]}
+          onClick={handleCashierDeskClick}
+          isOccupied={cashierActive}
+          rotation={[0, 0, 0]}
+        />
+        
+        {/* Master Chief - Behind the cashier desk */}
+        <MasterChiefModel 
+          position={[-5, 0, 2]} 
+          onClick={handleCashierClick}
+          isActive={cashierActive}
+        />
+      </group>
       
       {/* Computer Stations */}
       {computers.map((computer) => (
-        <ComputerStation3D
-          key={computer.id}
-          position={computer.position}
-          id={computer.id}
-          isOccupied={computer.isOccupied}
-          currentUser={computer.currentUser}
-        />
+        <group key={computer.id}>
+          {/* Computer Model */}
+          <ComputerModel
+            position={computer.position}
+            onClick={() => handleComputerClick(computer.id)}
+            isOccupied={computer.isOccupied}
+          />
+          {/* Antique Desk under the computer */}
+          <AntiqueDesk
+            position={[computer.position[0], computer.position[1], computer.position[2]]}
+          />
+        </group>
       ))}
       
       {/* Cyberpunk Neon Lighting System */}
       <CyberpunkNeonLights computers={computers} />
       
-      <pointLight position={[0, 2, 0]} intensity={100} color="#ff00ff" distance={20} decay={0.5} />
+      <pointLight position={[0, 2, 0]} intensity={50} color="#ff00ff" distance={20} decay={0.5} />
+      
+      {/* Natural Sky Lighting */}
+      <directionalLight 
+        position={[0, 10, 0]} 
+        intensity={0.8} 
+        color="#87CEEB" 
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={50}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
+      />
+      
+      {/* Window Light Sources */}
+      <directionalLight position={[-10, 5, 0]} intensity={0.4} color="#87CEEB" />
+      <directionalLight position={[10, 5, 0]} intensity={0.4} color="#87CEEB" />
+      <directionalLight position={[0, 5, -10]} intensity={0.4} color="#87CEEB" />
       
       {/* Enhanced Atmospheric Lighting */}
-      <ambientLight intensity={0.15} color="#1a0a2e" />
+      <ambientLight intensity={0.25} color="#87CEEB" />
       <pointLight position={[3, 6, 0]} intensity={1.2} color="#00ffff" distance={20} decay={1.5} />
       <pointLight position={[6, 6, 0]} intensity={1.2} color="#ff00ff" distance={20} decay={1.5} />
       <pointLight position={[9, 6, 0]} intensity={1.2} color="#ffff00" distance={20} decay={1.5} />
@@ -370,19 +378,44 @@ const CyberCafeRoom3D: React.FC = () => {
 
 // Main 3D Cyber Café Component
 const CyberCafe3D: React.FC = () => {
+  const [cameraTarget, setCameraTarget] = useState<{
+    position: [number, number, number];
+    lookAt: [number, number, number];
+  } | null>(null);
+
+
+  const resetCamera = () => {
+    setCameraTarget(null);
+  };
+
+  const handleAnimationComplete = () => {
+    // Animation complete - camera stays unlocked for user control
+  };
+
   return (
     <div className="w-full h-screen bg-black">
       <Canvas camera={{ position: [-2, 3, 10], fov: 80 }}>
         <fog attach="fog" args={['#0a0a1a', 5, 25]} />
-        <CyberCafeRoom3D />
+        <CameraBoundaryController />
+        <CyberCafeRoom3D onCameraTargetChange={setCameraTarget} />
+        <CameraController 
+          targetPosition={cameraTarget?.position}
+          targetLookAt={cameraTarget?.lookAt}
+          onAnimationComplete={handleAnimationComplete}
+        />
         <OrbitControls 
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={3}
-          maxDistance={25}
+          minDistance={2}
+          maxDistance={15}
           maxPolarAngle={Math.PI / 2}
           minPolarAngle={Math.PI / 6}
+          // Restrict camera to stay within room boundaries
+          minAzimuthAngle={-Math.PI / 2} // Prevent going too far left
+          maxAzimuthAngle={Math.PI / 2}  // Prevent going too far right
+          // Target position for orbit controls (center of room)
+          target={[0, 0, 0]}
         />
       </Canvas>
       
@@ -390,14 +423,22 @@ const CyberCafe3D: React.FC = () => {
       <div className="absolute top-4 left-4 bg-black bg-opacity-70 border border-cyan-400 rounded-lg p-4 text-white font-mono">
         <h2 className="text-xl font-bold text-cyan-400 mb-2">CYBER CAFÉ 3D</h2>
         <p className="text-sm text-gray-300 mb-2">
-          • Use mouse to rotate view<br/>
+          • Click on cashier desk or Master Chief to interact<br/>
+          • Click on computer screens to view them<br/>
+          • Use mouse to rotate view (camera stays in room)<br/>
           • Scroll to zoom in/out<br/>
-          • Click and drag to pan<br/>
+          • Natural lighting from windows<br/>
           • Hover over objects for interaction
         </p>
-        <div className="text-green-400 text-sm">
+        <div className="text-green-400 text-sm mb-3">
           STATUS: ACTIVE | TIME: {new Date().toLocaleTimeString()}
         </div>
+        <button 
+          onClick={resetCamera}
+          className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-xs font-bold transition-colors"
+        >
+          🔄 RESET CAMERA
+        </button>
       </div>
       
       {/* Controls Info */}
