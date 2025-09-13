@@ -68,7 +68,7 @@ const MasterChiefModel = ({ position, onClick, isActive }: {
 
   const handleAddCreditsClick = (e: any) => {
     e.stopPropagation(); // Prevent the parent onClick from firing
-    navigate('/'); // Redirect to main cyber cafe where user can interact with cashier
+    navigate('/payment'); // Redirect to main cyber cafe where user can interact with cashier
   };
 
   return (
