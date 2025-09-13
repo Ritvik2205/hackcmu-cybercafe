@@ -64,6 +64,13 @@ const CashierDesk3D: React.FC<{ position: [number, number, number] }> = ({ posit
   );
 };
 
+const getRandomChoice: string =(arr: string[]) =>{
+  const randomIndex = Math.floor(Math.random() * arr.length);
+  return arr[randomIndex];
+}
+
+const colors=["#fcba03","#1a2999", "#37a62b", "#e81405"];
+
 // 3D Computer Station Component
 const ComputerStation3D: React.FC<{ 
   position: [number, number, number]; 
@@ -219,6 +226,76 @@ const Cashier3D: React.FC<{ position: [number, number, number]; name: string }> 
   );
 };
 
+const User3D: React.FC<{ position: [number, number, number]; name: string, color: string }> = ({ position, name, color }) => {
+  const meshRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.02;
+    }
+  });
+
+  return (
+    <group ref={meshRef} position={position}>
+      {/* Cashier Body */}
+      <Box args={[0.4, 1.2, 0.3]} position={[0, 0.6, 0]}>
+        <meshLambertMaterial color={color} />
+      </Box>
+      
+      {/* Head */}
+      <Box args={[0.3, 0.3, 0.25]} position={[0, 1.5, 0]}>
+        <meshLambertMaterial color="#FDBCB4" />
+      </Box>
+      
+      {/* Eyes */}
+      <Box args={[0.05, 0.05, 0.02]} position={[-0.08, 1.55, 0.12]}>
+        <meshLambertMaterial color="#000" />
+      </Box>
+      <Box args={[0.05, 0.05, 0.02]} position={[0.08, 1.55, 0.12]}>
+        <meshLambertMaterial color="#000" />
+      </Box>
+      
+      {/* Arms */}
+      <Box args={[0.15, 0.6, 0.15]} position={[-0.4, 0.7, 0]}>
+        <meshLambertMaterial color="#FDBCB4" />
+      </Box>
+      <Box args={[0.15, 0.6, 0.15]} position={[0.4, 0.7, 0]}>
+        <meshLambertMaterial color="#FDBCB4" />
+      </Box>
+      
+      {/* Legs */}
+      <Box args={[0.15, 0.8, 0.15]} position={[-0.1, -0.4, 0]}>
+        <meshLambertMaterial color="#000080" />
+      </Box>
+      <Box args={[0.15, 0.8, 0.15]} position={[0.1, -0.4, 0]}>
+        <meshLambertMaterial color="#000080" />
+      </Box>
+      
+      {/* Name Label */}
+      <Text
+        position={[0, 2.2, 0]}
+        fontSize={0.15}
+        color="#00ffff"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {name}
+      </Text>
+      
+      {/* Title Label */}
+      {/* <Text
+        position={[0, 2, 0]}
+        fontSize={0.1}
+        color="#ffff00"
+        anchorX="center"
+        anchorY="middle"
+      >
+        CASHIER
+      </Text> */}
+    </group>
+  );
+};
+
 // Room Environment
 const Room: React.FC = () => {
   return (
@@ -296,6 +373,15 @@ const CyberCafeRoom3D: React.FC = () => {
       {/* Cashier - Behind the cashier desk */}
       <Cashier3D position={[-6, 0, 3.5]} name="Alex Chen" />
       
+      {/* Computer users */}
+      {computers.filter(computers => computers.isOccupied).map((computer) => (
+        <User3D
+          position={[computer.position[0], computer.position[1], computer.position[2]-0.7]}
+          name=""
+          color={getRandomChoice(colors)}
+        />
+      ))}
+
       {/* Computer Stations */}
       {computers.map((computer) => (
         <ComputerStation3D
