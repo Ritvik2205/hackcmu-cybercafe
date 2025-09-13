@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import GameScreen from './pages/GameScreen';
 import RetroDesktop from './pages/RetroDesktop';
+import Payment from './pages/Payment';
 import './App.css';
 import { CyberCafe3D } from './components/3D';
 import WelcomeScreen from './components/WelcomeScreen';
@@ -37,6 +38,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/payment" element={<Payment/>} />
           <Route path="/game/:gameType" element={<GameScreen />} />
           <Route path="/desktop" element={<RetroDesktop />} />
         </Routes>
