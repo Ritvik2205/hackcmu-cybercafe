@@ -114,6 +114,65 @@ const CameraController: React.FC<{
 
 // Cashier3D component removed - replaced with MasterChiefModel
 
+const User3D: React.FC<{ position: [number, number, number]; name: string, color: string }> = ({ position, name, color }) => {
+  const meshRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.02;
+    }
+  });
+
+  return (
+    <group ref={meshRef} position={position}>
+      {/* Cashier Body */}
+      <Box args={[0.4, 1.2, 0.3]} position={[0, 0.6, 0]}>
+        <meshLambertMaterial color={color} />
+      </Box>
+      
+      {/* Head */}
+      <Box args={[0.3, 0.3, 0.25]} position={[0, 1.5, 0]}>
+        <meshLambertMaterial color="#FDBCB4" />
+      </Box>
+      
+      {/* Eyes */}
+      <Box args={[0.05, 0.05, 0.02]} position={[-0.08, 1.55, 0.12]}>
+        <meshLambertMaterial color="#000" />
+      </Box>
+      <Box args={[0.05, 0.05, 0.02]} position={[0.08, 1.55, 0.12]}>
+        <meshLambertMaterial color="#000" />
+      </Box>
+      
+      {/* Arms */}
+      <Box args={[0.15, 0.6, 0.15]} position={[-0.4, 0.7, 0]}>
+        <meshLambertMaterial color="#FDBCB4" />
+      </Box>
+      <Box args={[0.15, 0.6, 0.15]} position={[0.4, 0.7, 0]}>
+        <meshLambertMaterial color="#FDBCB4" />
+      </Box>
+      
+      {/* Legs */}
+      <Box args={[0.15, 0.8, 0.15]} position={[-0.1, -0.4, 0]}>
+        <meshLambertMaterial color="#000080" />
+      </Box>
+      <Box args={[0.15, 0.8, 0.15]} position={[0.1, -0.4, 0]}>
+        <meshLambertMaterial color="#000080" />
+      </Box>
+      
+      {/* Title Label */}
+      {/* <Text
+        position={[0, 2, 0]}
+        fontSize={0.1}
+        color="#ffff00"
+        anchorX="center"
+        anchorY="middle"
+      >
+        CASHIER
+      </Text> */}
+    </group>
+  );
+};
+
 // Room Environment with Windows and Natural Lighting
 const Room: React.FC = () => {
   return (
@@ -208,11 +267,11 @@ const CyberCafeRoom3D: React.FC<{
   
   const [computers] = useState([
     // Vertical Column 1 (Back to Front) - Right side
-    { id: 1, position: [0, 1, -4] as [number, number, number], isOccupied: false },
-    { id: 2, position: [0, 1, -2] as [number, number, number], isOccupied: true, currentUser: 'gamer_123' },
-    { id: 3, position: [0, 1, 0] as [number, number, number], isOccupied: false },
-    { id: 4, position: [0, 1, 2] as [number, number, number], isOccupied: true, currentUser: 'retro_player' },
-    { id: 5, position: [0, 1, 4] as [number, number, number], isOccupied: false },
+    { id: 1, position: [0, 1, -4.5] as [number, number, number], isOccupied: false },
+    { id: 2, position: [0, 1, -2.5] as [number, number, number], isOccupied: true, currentUser: 'gamer_123' },
+    { id: 3, position: [0, 1, -0.5] as [number, number, number], isOccupied: false },
+    { id: 4, position: [0, 1, 1.5] as [number, number, number], isOccupied: true, currentUser: 'retro_player' },
+    { id: 5, position: [0, 1, 3.5] as [number, number, number], isOccupied: false },
     
     // Vertical Column 2 (Back to Front) - Right side
     { id: 6, position: [4, 1, -4] as [number, number, number], isOccupied: true, currentUser: 'cyber_ninja' },
